@@ -3,6 +3,9 @@ from config import FILE_TYPE # Import dictionary from config.py
 from pathlib import Path
 import shutil
 from datetime import datetime
+import subprocess
+import sys
+from time import sleep
 
 def classify_file(file_path):
     _, ext = os.path.splitext(file_path) # Get the file extension from the file_path
@@ -17,7 +20,6 @@ def classify_file(file_path):
 def move_files(folder, sim=False):
     base_path = Path(folder) # Create a main folder to store the organized files
     main_folder = base_path / 'Organized_Files'
-    # For the record, next time I'll definetely add a simulation mode, since I lost the contents of my test folder while I was trying to create "Organized_Files" as a subfolder of the current folder :(
     if not sim:
         try:
             main_folder.mkdir(exist_ok=True) # Create the main folder if it doesn't exist
@@ -56,3 +58,61 @@ def move_files(folder, sim=False):
             else:
                 with open(base_path / 'sim_log.txt', 'a', encoding='utf-8') as log_file:
                     log_file.write(f'[{datetime.now().strftime("%H:%M:%S")}] Would move "{file.name}" from "{base_path}" to "{destiny}".\n')
+
+def clear():
+    if os.name == 'nt':
+        subprocess.run('cls', shell=True)
+    else:
+        subprocess.run('clear', shell=True)
+
+def getch():
+    if sys.platform == 'win32':
+        import msvcrt
+        return msvcrt.getch().decode('utf-8', errors='ignore')
+    else:
+        import termios
+        import tty
+
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            return sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+def menu():
+    print("\033[?25l", end="", flush=True)
+    try:
+        while True:
+            # This is a provisional menu. The first menu should have 4 options: Move, Simulation, Language and Exit. If you press Move or Simulation, you unlock another menu with Select folder and Write folder path options 
+            clear()
+            print('========== Task Automatizer ==========')
+            print('1 - Select folder')
+            print('2 - Write folder path')
+            print('3 - Language')
+            print('4 - Exit')
+            print('======================================')
+
+            option = getch()
+            if option == '4':
+                clear()
+                break
+            elif option == '2':
+                clear()
+                print("\033[?25h", end="", flush=True)
+                folder = str(input('Insert the folder path: ')) # For now, we directly ask the user for the folder path. In the future, we will convert this into a command line argument. Or we may add a proper GUI for easier use.
+                try:
+                    move_files(folder)
+                    print('[SUCCESS] Files have been organized successfully.\n* log.txt created.')
+                    sleep(3)
+
+                except FileNotFoundError: # If the folder doesn't exist, we catch the exception and print a message to the user.
+                    print('[ERROR] The folder does not exist.')
+            else:
+                clear()
+                print('[ERROR] You must choose an option from 1 to 4.')
+                sleep(3)
+
+    finally:
+        print("\033[?25h", end="", flush=True)
