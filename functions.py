@@ -1,7 +1,8 @@
 import os
 from config import FILE_TYPE # Import dictionary from config.py
-import pathlib
+from pathlib import Path
 import shutil
+from datetime import datetime
 
 def classify_file(file_path):
     _, ext = os.path.splitext(file_path) # Get the file extension from the file_path
@@ -14,10 +15,14 @@ def classify_file(file_path):
     return 'Others' # If it isn't, return 'Others' as the category name
 
 def move_files(folder):
-    base_path = pathlib.Path(folder) # Create a main folder to store the organized files
+    base_path = Path(folder) # Create a main folder to store the organized files
     main_folder = base_path / 'Organized_Files'
     # For the record, next time I'll definetely add a simulation mode, since I lost the contents of my test folder while I was trying to create "Organized_Files" as a subfolder of the current folder :(
-    main_folder.mkdir(exist_ok=True) # Create the main folder if it doesn't exist
+    try:
+        main_folder.mkdir(exist_ok=True) # Create the main folder if it doesn't exist
+    except PermissionError: # If the user doesn't have permission to create the folder, we catch the exception and print a message to the user.
+        print(f'[ERROR] Not enough permission to create folders in {main_folder}')
+        return
     created_folders = set() # Create a set to store the created folders
 
     with os.scandir(folder) as files: # Scan the folder for files
@@ -41,4 +46,9 @@ def move_files(folder):
                 while destiny_path.exists():
                     destiny_path = f'{base}_{num}{ext}'
                     num += 1
-            shutil.move(file.path, destiny_path)
+            try:
+                shutil.move(file.path, destiny_path)
+                with open(main_folder / 'log.txt', 'a', encoding='utf-8') as log_file:
+                    log_file.write(f'[{datetime.now().strftime("%H:%M:%S")}] Moved "{file.name}" from "{base_path}" to "{destiny_path}".\n') # Log the moved file and its new path
+            except PermissionError:
+                print(f'[SKIPPED] File "{file.name}" already in use or not enough permission for moving it')
