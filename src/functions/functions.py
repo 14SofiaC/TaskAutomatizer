@@ -47,7 +47,7 @@ def move_files(folder, sim=False):
                 while destiny_path.exists():
                     destiny_path = destiny / f'{base}_{num}{ext}'
                     num += 1
-            if not sim:
+            if not sim: # If it's not a simulation, the program moves the files and creates a log.txt. Also catches a PermissionError in case it's not allowed to move a file or the user is already using that file.
                 try:
                     shutil.move(file.path, destiny_path)
                     with open(main_folder / 'log.txt', 'a', encoding='utf-8') as log_file:
@@ -58,13 +58,13 @@ def move_files(folder, sim=False):
                 with open(base_path / 'sim_log.txt', 'a', encoding='utf-8') as log_file:
                     log_file.write(f'[{datetime.now().strftime("%H:%M:%S")}] Would move "{file.name}" from "{base_path}" to "{destiny}".\n')
 
-def clear():
+def clear(): # Basic clear function
     if os.name == 'nt':
         subprocess.run('cls', shell=True)
     else:
         subprocess.run('clear', shell=True)
 
-def getch():
+def getch(): # Function to get a single character from user input without requiring the Enter key. It works for both Windows and Unix-like systems.
     if sys.platform == 'win32':
         import msvcrt
         return msvcrt.getch().decode('utf-8', errors='ignore')

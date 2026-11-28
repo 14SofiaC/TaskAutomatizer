@@ -8,3 +8,4 @@ FILE_TYPE = {
 }
 
 # This dictionary categorizes different file types based on their extensions. Each key represents a category (e.g., 'Images', 'Videos', 'Documents'), and the corresponding value is a list of file extensions associated with that category. This structure allows for easy classification of files based on their extensions when used in conjunction with the 'classify_file' function from 'functions.py'.
+# The user is free to change this dictionary at will. At the end of the day, they're the ones who know the best how they want to organize their folders.
