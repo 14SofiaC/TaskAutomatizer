@@ -1,4 +1,3 @@
-import functions
+from src.functions.gui import menu
 
-functions.clear()
-functions.menu()
+menu()
